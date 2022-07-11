@@ -25,42 +25,59 @@ torch.manual_seed(0)
 
 
 
-# These need to be re-defined 
+# These need to be re-defined when changing dataset for training
 # ********************************************************************************************
 
-# class_distr = torch.Tensor([0.087, 0.0833, 0.0833, 0.0833, 0.0833, 0.0833,
-#                            0.0833, 0.0833, 0.0833, 0.0833, 0.0833, 0.0833]) # testing with VIMS shoreline data which has 12 categories
+bands_mean = np.array([0.04783991, 0.04056812, 0.03163572]).astype('float32') # the mean and std need to re-calculate
+bands_std = np.array([0.04725893, 0.04743808, 0.04699043]).astype('float32')
 
-# class_distr = torch.Tensor([0.06935144, 0.11771979, 0.1645004 , 0.15852254, 0.16526209,
-#        0.16038279, 0.16426094]) # image size 1024 for CUSP
-
-# class_distr = torch.Tensor([0.0867273 , 0.11636207, 0.16303951, 0.15027153, 0.16063503,
-#        0.16078242, 0.16218214]) # Image size 256, 7 classes from CUSP
-
-# class_distr = torch.Tensor([0.1052062 , 0.16581804, 0.24249604, 0.23955936, 0.24692036]) # 5 classes
-
-class_distr = torch.Tensor([0.1343008 , 0.21761741, 0.32910008, 0.31898171]) # 4 classes
-
-
-bands_mean = np.array([0.04783991, 0.04056812, 0.03163572, 0.02972606]).astype('float32') # the mean and std need to re-calculate
-
-bands_std = np.array([0.04725893, 0.04743808, 0.04699043, 0.04967381]).astype('float32')
-
+# Setting dataset folder and its weights
 # ********************************************************************************************
 
+data_name = 'Image_allyear_VA_256'
+dataset_path = os.path.join(up(up(up(__file__))), 'datasets', data_name) #, '256_images_lesstrain'
+
+# # Pixel-Level class distribution for each dataset
+"""
+{'Image_allyear_merged_512': array([0.49019898, 0.44645175, 0.02657669, 0.03677258]),
+ 'Image_after_2010_merged_512': array([0.45526231, 0.43276168, 0.05267328, 0.05930273]),
+ 'Image_after_2010_merged_256': array([0.32490837, 0.41855632, 0.17178225, 0.08475305]),
+ 'Image_allyear_merged_256': array([0.44056167, 0.41559786, 0.09143975, 0.05240071]),
+ 'Image_allyear_merged_1024': array([0.50426896, 0.4565353 , 0.01033589, 0.02885985]),
+ 'Image_after_2010_merged_1024': array([0.49582348, 0.43486081, 0.02433212, 0.04498359]),
+ 'Image_after_2010_VA_512': array([0.47100772, 0.44772889, 0.01990966, 0.06135373]),
+ 'Image_after_2010_VA_256': array([0.37283283, 0.48029399, 0.04961892, 0.09725425]),
+ 'Image_allyear_VA_512': array([0.49843776, 0.45395527, 0.01021636, 0.03739061]),
+ 'Image_allyear_VA_256': array([0.47332474, 0.44650446, 0.02387324, 0.05629757])}
+"""
 
 
-# bands_std = np.array([0.04725893, 0.04743808, 0.04699043, 0.04967381, 0.04946782, 0.06458357,
-#  0.07594915, 0.07120246, 0.08251058, 0.05111466, 0.03524419]).astype('float32')
-
+if data_name == 'Image_after_2010_merged_512':
+    class_distr = torch.Tensor([0.45526231, 0.43276168, 0.05267328, 0.05930273]) # 4 classes
+elif data_name == 'Image_after_2010_merged_256':
+    class_distr = torch.Tensor([0.32490837, 0.41855632, 0.17178225, 0.08475305])
+elif data_name == 'Image_after_2010_merged_1024':
+    class_distr = torch.Tensor([0.49582348, 0.43486081, 0.02433212, 0.04498359])
+elif data_name == 'Image_allyear_merged_256':
+    class_distr = torch.Tensor([0.44056167, 0.41559786, 0.09143975, 0.05240071])
+elif data_name == 'Image_allyear_merged_512':
+    class_distr = torch.Tensor([0.49019898, 0.44645175, 0.02657669, 0.03677258])
+elif data_name == 'Image_allyear_merged_1024':
+    class_distr = torch.Tensor([0.50426896, 0.4565353 , 0.01033589, 0.02885985])
+elif data_name == 'Image_after_2010_VA_512':
+    class_distr = torch.Tensor([0.47100772, 0.44772889, 0.01990966, 0.06135373])
+elif data_name == 'Image_after_2010_VA_256':
+    class_distr = torch.Tensor([0.37283283, 0.48029399, 0.04961892, 0.09725425])
+elif data_name == 'Image_allyear_VA_512':
+    class_distr = torch.Tensor([0.49843776, 0.45395527, 0.01021636, 0.03739061])
+elif data_name == 'Image_allyear_VA_256':
+    class_distr = torch.Tensor([0.47332474, 0.44650446, 0.02387324, 0.05629757])
+else:
+    raise
+    
 ###############################################################
 # Pixel-level Semantic Segmentation Data Loader               #
 ###############################################################
-
-# dataset_path = os.path.join(up(up(up(__file__))), 'data')
-dataset_path = os.path.join(up(up(up(up(up(__file__))))), 'VIMS', 'NAIP', 'VA_NAIP_2018_8977') #, '256_images_lesstrain'
-
-# dataset_path = os.path.join(up(up(up(up(up(__file__))))), 'VIMS', 'Shoreline', 'shoreline_data_unet')
 
 class GenDEBRIS(Dataset): # Extend PyTorch's Dataset class
 
@@ -89,7 +106,7 @@ class GenDEBRIS(Dataset): # Extend PyTorch's Dataset class
             
             # Construct file and folder name from roi
             roi_file = os.path.join(path, mode, roi)
-            roi_file_mask = os.path.join(path, 'labels', roi)
+            roi_file_mask = os.path.join(path, 'masks', roi)
             
             # Load Classsification Mask
             ds = rasterio.open(roi_file_mask)
@@ -105,10 +122,8 @@ class GenDEBRIS(Dataset): # Extend PyTorch's Dataset class
 
 #                 temp[temp==0]=-1000
 
-            
             # Categories from 1 to 0
-
-#             temp = np.copy(temp - 1)
+            temp = np.copy(temp - 1)
             ds=None                   # Close file
             
             self.y.append(temp)

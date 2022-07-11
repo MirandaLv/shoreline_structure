@@ -1,0 +1,14 @@
+segmentation_model: unet
+encoder_name: resnet50
+encoder_weights: imagenet
+learning_rate: 0.001
+in_channels: 3
+num_classes: 5
+learning_rate_schedule_patience: 6
+ignore_zeros: false
+loss: ce
+imagenet_pretraining: true
+class_weights: null
+betas:
+- 0.9
+- 0.999
